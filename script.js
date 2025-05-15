@@ -6,45 +6,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const numberOfSlices = 20;
     const anglePerSlice = 360 / numberOfSlices; // 18 degrees
 
-    // Outcome definitions (full names for announcement, short for slices)
     const outcomes = [
-        { name: "In The Zone", short: "IN", color: "#27ae60" }, // Darker Green
-        { name: "Not In The Zone", short: "OUT", color: "#c0392b" } // Darker Red
+        { name: "In The Zone", short: "IN", color: "#27ae60" },     // Index 0 (Green)
+        { name: "Not In The Zone", short: "OUT", color: "#c0392b" } // Index 1 (Red)
     ];
 
     let isSpinning = false;
-    let currentWheelRotation = 0; // Tracks the wheel's actual rotation
+    let currentWheelRotation = 0;
 
-    // Generate Slices
+    // Generate Slices (This part remains unchanged)
     for (let i = 0; i < numberOfSlices; i++) {
         const slice = document.createElement('div');
         slice.classList.add('slice');
-
-        const outcomeIndex = i % 2; // 0 for "In The Zone", 1 for "Not In The Zone"
+        const outcomeIndex = i % 2;
         const currentOutcome = outcomes[outcomeIndex];
-
         slice.classList.add(outcomeIndex === 0 ? 'slice-in-zone' : 'slice-not-in-zone');
-        slice.dataset.sliceIndex = i; // Original index for targeting
-        slice.dataset.zoneName = currentOutcome.name; // Full name for logic
-
-        // Calculate the rotation for this slice div
+        slice.dataset.sliceIndex = i;
+        slice.dataset.zoneName = currentOutcome.name;
         const sliceRotation = i * anglePerSlice;
         slice.style.transform = `rotate(${sliceRotation}deg)`;
-
-        // Add text span to the slice
         const textSpan = document.createElement('span');
         textSpan.textContent = currentOutcome.short;
-
-        // Counter-rotate the text span to keep text horizontal
-        // The span itself is positioned within the unrotated slice's clip-path area
-        // This rotation is relative to the slice's own rotation
         textSpan.style.transform = `rotate(${-sliceRotation}deg)`;
-
         slice.appendChild(textSpan);
         wheelElement.appendChild(slice);
     }
 
-    const allSlices = wheelElement.querySelectorAll('.slice'); // Get all generated slices
+    const allSlices = wheelElement.querySelectorAll('.slice');
 
     spinButton.addEventListener('click', () => {
         if (isSpinning) return;
@@ -52,93 +40,96 @@ document.addEventListener('DOMContentLoaded', () => {
         isSpinning = true;
         spinButton.disabled = true;
         resultDisplay.textContent = "Spinning...";
-        resultDisplay.style.color = "#555"; // Reset color
+        resultDisplay.style.color = "#555";
 
-        // Remove any previous winning visual effect
         allSlices.forEach(s => s.classList.remove('winning-slice-visual-effect'));
 
-        // 1. Determine the winning outcome type (In The Zone or Not In The Zone)
-        const winningOutcomeTypeIndex = Math.floor(Math.random() * outcomes.length);
-        const winningOutcome = outcomes[winningOutcomeTypeIndex];
+        // --- MODIFIED SECTION FOR WEIGHTED RANDOM CHOICE ---
+        // 1. Determine the winning outcome type with weighted probability
+        // 25% chance for "In The Zone" (outcomes[0])
+        // 75% chance for "Not In The Zone" (outcomes[1])
+        const randomNumber = Math.random(); // Generates a float between 0 (inclusive) and 1 (exclusive)
+        let winningOutcome;
+
+        if (randomNumber < 0.25) { // 0.0 to 0.2499... (25% probability)
+            winningOutcome = outcomes[0]; // "In The Zone"
+        } else { // 0.25 to 0.999... (75% probability)
+            winningOutcome = outcomes[1]; // "Not In The Zone"
+        }
+        // --- END OF MODIFIED SECTION ---
+
+        // For debugging, you can log the chosen outcome:
+        // console.log("Chosen outcome:", winningOutcome.name, "(Random number:", randomNumber.toFixed(4) + ")");
+
 
         // 2. Find all slices that match this winning outcome type
         const candidateSliceIndices = [];
         allSlices.forEach((slice) => {
+            // Ensure comparison is with the chosen winningOutcome.name
             if (slice.dataset.zoneName === winningOutcome.name) {
                 candidateSliceIndices.push(parseInt(slice.dataset.sliceIndex));
             }
         });
+        
+        // If candidateSliceIndices is empty, something went wrong (e.g., typo in names)
+        // but with the current setup, it should always find 10 candidates.
+        if (candidateSliceIndices.length === 0) {
+            console.error("Error: No candidate slices found for outcome:", winningOutcome.name);
+            // Fallback or error handling
+            isSpinning = false;
+            spinButton.disabled = false;
+            resultDisplay.textContent = "Error in spin logic!";
+            return;
+        }
+
 
         // 3. Randomly pick one of these candidate slices to be the "winning" one
         const targetSliceActualIndex = candidateSliceIndices[Math.floor(Math.random() * candidateSliceIndices.length)];
 
         // 4. Calculate rotation for the wheel
-        // The target slice (targetSliceActualIndex) is initially at `targetSliceActualIndex * anglePerSlice`
-        // We want this slice to align with the pointer (0 degrees).
-        // So, the wheel needs to rotate by `-(targetSliceActualIndex * anglePerSlice)` relative to its starting position.
         const rotationToAlignSlice = -(targetSliceActualIndex * anglePerSlice);
-
-        // Add multiple full spins for visual effect
-        const randomExtraSpins = 3 + Math.floor(Math.random() * 3); // 3 to 5 full spins
+        const randomExtraSpins = 3 + Math.floor(Math.random() * 3);
         const fullSpinsRotation = randomExtraSpins * 360;
 
-        // Calculate the final target rotation angle for the wheel
-        // We want to spin smoothly from currentWheelRotation to the new target
-        // The targetAngle is the desired *end position* (modulo 360)
-        // The finalRotation includes full spins and lands on the targetAngle
-        let finalRotation = fullSpinsRotation + rotationToAlignSlice;
+        // Calculate the final target CSS rotation
+        // Start with current visual rotation, add full spins, then adjust to land on target
+        let totalCssRotation = currentWheelRotation + fullSpinsRotation;
 
-        // To ensure it always spins forward from the current visual rotation, adjust:
-        // Add currentWheelRotation to ensure it's relative to the start of this spin
-        // but currentWheelRotation is cumulative. We need to make sure final lands on targetAngle
-        // Easiest: `targetAngleForSpin = finalRotation`
-        // `wheel.style.transform = rotate(${currentWheelRotation + targetAngleForSpin}deg)` NO
+        // Normalize the target orientation (where the chosen slice should end up, i.e. 0 deg for pointer)
+        let desiredFinalOrientationNormalized = rotationToAlignSlice % 360;
+        if (desiredFinalOrientationNormalized < 0) desiredFinalOrientationNormalized += 360;
 
-        // Let currentWheelRotation be the starting point of the CSS animation.
-        // The new end point of the CSS animation is `newWheelEndRotation`
-        // The difference between `newWheelEndRotation % 360` and `rotationToAlignSlice % 360` should be 0.
+        // Current orientation after adding full spins
+        let currentOrientationAfterFullSpins = totalCssRotation % 360;
+        if (currentOrientationAfterFullSpins < 0) currentOrientationAfterFullSpins += 360;
         
-        // The desired final orientation of the wheel (mod 360)
-        const desiredFinalOrientation = rotationToAlignSlice;
+        // Adjustment needed to get from current orientation (after full spins) to desired target orientation
+        let adjustment = desiredFinalOrientationNormalized - currentOrientationAfterFullSpins;
 
-        // Total rotation for CSS:
-        // Start from currentWheelRotation, add full spins, then add delta to reach desiredFinalOrientation
-        let totalCssRotation = currentWheelRotation;
-        // Add full spins (making sure it moves forward)
-        totalCssRotation += fullSpinsRotation;
-        // Adjust to ensure the final landing position is correct
-        // Add the difference to get from (totalCssRotation % 360) to (desiredFinalOrientation % 360)
-        let currentOrientation = totalCssRotation % 360;
-        if (currentOrientation < 0) currentOrientation += 360; // Normalize positive
+        totalCssRotation += adjustment;
 
-        let diffToTarget = desiredFinalOrientation - currentOrientation;
-        // Ensure diffToTarget results in forward motion if added directly, or add 360
-        // if (diffToTarget < -180) diffToTarget += 360; // Prefer shorter forward spin
-        // if (diffToTarget > 180 && totalCssRotation > currentWheelRotation) diffToTarget -=360; // Prefer shorter backward if already spinning a lot
-
-        totalCssRotation += diffToTarget;
-        
-        // Ensure it spins at least the fullSpinsRotation from where it currently is visually
-        if (totalCssRotation < currentWheelRotation + fullSpinsRotation - anglePerSlice) { // -anglePerSlice for tolerance
-             totalCssRotation += 360 * Math.ceil((currentWheelRotation + fullSpinsRotation - totalCssRotation) / 360);
+        // Ensure the wheel spins forward sufficiently.
+        // If totalCssRotation is now less than what one full spin from currentWheelRotation would be,
+        // it means the 'adjustment' caused it to "lose" a planned spin or go backward too much.
+        // Add 360 until it's at least `currentWheelRotation + fullSpinsRotation` (approximately).
+        // This ensures it always completes the minimum visual rotations.
+        const minimumTargetRotation = currentWheelRotation + (randomExtraSpins > 0 ? (randomExtraSpins * 360) : 360) - anglePerSlice; // ensure at least one spin if randomExtraSpins was 0
+        while (totalCssRotation < minimumTargetRotation || totalCssRotation < currentWheelRotation + 360 - anglePerSlice) { // ensure at least one positive spin
+            totalCssRotation += 360;
         }
 
 
         wheelElement.style.transform = `rotate(${totalCssRotation}deg)`;
-        currentWheelRotation = totalCssRotation; // Update for the next spin
+        currentWheelRotation = totalCssRotation;
 
         // 5. Handle result display after spin animation
         setTimeout(() => {
             resultDisplay.textContent = `Michael is: ${winningOutcome.name}!`;
             resultDisplay.style.color = winningOutcome.color;
-
-            // Optional: Add a visual effect to the specific winning slice pointed to.
-            // The slice at targetSliceActualIndex is the one under the pointer.
             // allSlices[targetSliceActualIndex].classList.add('winning-slice-visual-effect');
-
             isSpinning = false;
             spinButton.disabled = false;
-        }, 4100); // Match CSS transition duration (4s) + a small buffer (100ms)
+        }, 4100);
     });
 
     // Initial setup text
