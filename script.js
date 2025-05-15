@@ -51,9 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const randomNumber = Math.random(); // Generates a float between 0 (inclusive) and 1 (exclusive)
         let winningOutcome;
 
-        if (randomNumber < 0.25) { // 0.0 to 0.2499... (25% probability)
+        if (randomNumber < 0.40) { // 0.0 to 0.3999... (40% probability)
             winningOutcome = outcomes[0]; // "In The Zone"
-        } else { // 0.25 to 0.999... (75% probability)
+        } else { // 0.40 to 0.999... (60% probability)
             winningOutcome = outcomes[1]; // "Not In The Zone"
         }
         // --- END OF MODIFIED SECTION ---
