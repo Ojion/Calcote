@@ -15,26 +15,55 @@ body {
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
 }
+
+.app-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('mike.jpg'); /* Ensure 'mike.jpg' is in the same folder */
+    
+    /* --- MODIFIED LINES FOR 2x2 TILING --- */
+    background-size: 50% 50%;   /* Each image instance takes 50% width and 50% height */
+    background-repeat: repeat;  /* Allow the image to tile (default is repeat, but explicit) */
+    /* background-position is not strictly needed when tiling from top-left with repeat */
+    /* --- END OF MODIFIED LINES --- */
+    
+    opacity: 0.2;
+    z-index: -1;
+    border-radius: inherit;
+}
+
 
 h1 {
     font-size: 1.8em;
     color: #333;
     margin-bottom: 10px;
+    position: relative;
+    z-index: 2;
 }
 
 #result-display {
     font-size: 1.5em;
     color: #555;
-    min-height: 1.5em; /* Prevent layout shift */
+    min-height: 1.5em;
     margin-bottom: 30px;
     font-weight: bold;
+    position: relative;
+    z-index: 2;
 }
 
 .roulette-container {
     position: relative;
-    width: 300px; /* Adjust as needed */
-    height: 300px; /* Adjust as needed */
+    z-index: 2;
+    width: 350px;
+    height: 350px;
     margin: 30px auto;
     display: flex;
     justify-content: center;
@@ -43,69 +72,62 @@ h1 {
 
 .wheel-pointer {
     position: absolute;
-    top: -10px; /* Position above the wheel */
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 30px;
-    color: #e74c3c; /* Red pointer */
+    color: #000000;
     z-index: 10;
 }
 
 .wheel {
     width: 100%;
     height: 100%;
-    border: 5px solid #333;
+    border: 8px solid #4a4a4a;
     border-radius: 50%;
     position: relative;
     overflow: hidden;
-    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Spin animation */
-    background-color: #ddd; /* Fallback or if segments don't fill */
-    display: flex; /* Use flex to arrange slots */
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    background-color: #c9c9c9;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 0 0 10px rgba(0,0,0,0.2);
+}
+
+.slice {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    clip-path: polygon(50% 50%, 42.18% 0.62%, 57.82% 0.62%);
     transform-origin: center center;
 }
 
-.slot {
-    flex: 1; /* Each slot takes equal space */
+.slice span {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.1em;
-    font-weight: bold;
-    text-align: center;
-    writing-mode: vertical-rl; /* Makes text vertical */
-    text-orientation: mixed;
-    padding: 10px;
-    box-sizing: border-box;
-    text-transform: uppercase;
-    color: white;
-}
-
-#slot-in-the-zone {
-    background-color: #2ecc71; /* Green */
-    /* Clip path can be used for more complex shapes if needed for more slots */
-}
-
-#slot-not-in-the-zone {
-    background-color: #e74c3c; /* Red */
-}
-
-
-/* Simplified "ball" - it will just appear on the winning segment conceptually */
-/* Or, we can try a pseudo-ball that moves a bit */
-.ball {
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border: 2px solid #333;
-    border-radius: 50%;
     position: absolute;
-    z-index: 5;
-    /* Initial position, will be updated by JS */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0; /* Initially hidden */
-    transition: transform 0.5s ease-out, opacity 0.3s ease-in-out;
+    width: 80%;
+    height: 35%;
+    top: 3%;
+    left: 10%;
+    transform-origin: center center;
+    text-align: center;
+    font-size: 11px;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    line-height: 1.1;
+    overflow: hidden;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+}
+
+.slice-in-zone {
+    background-color: #27ae60;
+}
+
+.slice-not-in-zone {
+    background-color: #c0392b;
 }
 
 #spin-button {
@@ -113,35 +135,21 @@ h1 {
     padding: 15px 30px;
     font-size: 1.2em;
     color: white;
-    background-color: #3498db; /* Blue button */
+    background-color: #2980b9;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-top: 20px;
+    position: relative;
+    z-index: 2;
 }
 
 #spin-button:hover {
-    background-color: #2980b9;
+    background-color: #1f638d;
 }
 
 #spin-button:disabled {
     background-color: #bdc3c7;
     cursor: not-allowed;
-}
-
-/* Animation for winning slot (optional) */
-.winning-slot {
-    animation: pulse 0.8s infinite alternate;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        filter: brightness(100%);
-    }
-    100% {
-        transform: scale(1.05);
-        filter: brightness(120%);
-    }
 }
