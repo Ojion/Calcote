@@ -1,0 +1,147 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    color: #333;
+    text-align: center;
+}
+
+.app-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#result-display {
+    font-size: 1.5em;
+    color: #555;
+    min-height: 1.5em; /* Prevent layout shift */
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.roulette-container {
+    position: relative;
+    width: 300px; /* Adjust as needed */
+    height: 300px; /* Adjust as needed */
+    margin: 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -10px; /* Position above the wheel */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    color: #e74c3c; /* Red pointer */
+    z-index: 10;
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border: 5px solid #333;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Spin animation */
+    background-color: #ddd; /* Fallback or if segments don't fill */
+    display: flex; /* Use flex to arrange slots */
+    transform-origin: center center;
+}
+
+.slot {
+    flex: 1; /* Each slot takes equal space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+    writing-mode: vertical-rl; /* Makes text vertical */
+    text-orientation: mixed;
+    padding: 10px;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    color: white;
+}
+
+#slot-in-the-zone {
+    background-color: #2ecc71; /* Green */
+    /* Clip path can be used for more complex shapes if needed for more slots */
+}
+
+#slot-not-in-the-zone {
+    background-color: #e74c3c; /* Red */
+}
+
+
+/* Simplified "ball" - it will just appear on the winning segment conceptually */
+/* Or, we can try a pseudo-ball that moves a bit */
+.ball {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border: 2px solid #333;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 5;
+    /* Initial position, will be updated by JS */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0; /* Initially hidden */
+    transition: transform 0.5s ease-out, opacity 0.3s ease-in-out;
+}
+
+#spin-button {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    color: white;
+    background-color: #3498db; /* Blue button */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+#spin-button:hover {
+    background-color: #2980b9;
+}
+
+#spin-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* Animation for winning slot (optional) */
+.winning-slot {
+    animation: pulse 0.8s infinite alternate;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        filter: brightness(100%);
+    }
+    100% {
+        transform: scale(1.05);
+        filter: brightness(120%);
+    }
+}
