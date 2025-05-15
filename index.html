@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-A">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Michael Calcote's Zone Status</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <h1>Where is Michael Calcote in regards to receiving information?</h1>
+        <h2 id="result-display">Click "Spin" to find out!</h2>
+
+        <div class="roulette-container">
+            <div class="wheel-pointer">▼</div>
+            <div id="wheel" class="wheel">
+                <div class="slot" id="slot-in-the-zone">
+                    <span>In The Zone</span>
+                </div>
+                <div class="slot" id="slot-not-in-the-zone">
+                    <span>Not In The Zone</span>
+                </div>
+                {/* You can add more invisible divs here to act as "spokes" or segment dividers
+                    if you want a more traditional roulette look, but for two segments it's simpler this way. */}
+            </div>
+            <div id="ball" class="ball"></div>
+        </div>
+
+        <button id="spin-button">Spin!</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
