@@ -46,14 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- MODIFIED SECTION FOR WEIGHTED RANDOM CHOICE ---
         // 1. Determine the winning outcome type with weighted probability
-        // 25% chance for "In The Zone" (outcomes[0])
-        // 75% chance for "Not In The Zone" (outcomes[1])
+        // 50% chance for "In The Zone" (outcomes[0])
+        // 50% chance for "Not In The Zone" (outcomes[1])
         const randomNumber = Math.random(); // Generates a float between 0 (inclusive) and 1 (exclusive)
         let winningOutcome;
 
-        if (randomNumber < 0.40) { // 0.0 to 0.3999... (40% probability)
+        if (randomNumber < 0.50) { // 0.0 to 0.4999... (50% probability)
             winningOutcome = outcomes[0]; // "In The Zone"
-        } else { // 0.40 to 0.999... (60% probability)
+        } else { // 0.50 to 0.999... (50% probability)
             winningOutcome = outcomes[1]; // "Not In The Zone"
         }
         // --- END OF MODIFIED SECTION ---
